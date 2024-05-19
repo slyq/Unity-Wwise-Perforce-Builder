@@ -1,0 +1,120 @@
+<?xml version='1.1' encoding='UTF-8'?>
+<project>
+  <actions/>
+  <description></description>
+  <keepDependencies>false</keepDependencies>
+  <properties>
+    <hudson.plugins.jira.JiraProjectProperty plugin="jira@3.12"/>
+    <hudson.plugins.buildblocker.BuildBlockerProperty plugin="build-blocker-plugin@1.7.9">
+      <useBuildBlocker>false</useBuildBlocker>
+      <blockLevel>GLOBAL</blockLevel>
+      <scanQueueFor>DISABLED</scanQueueFor>
+      <blockingJobs></blockingJobs>
+    </hudson.plugins.buildblocker.BuildBlockerProperty>
+    <com.chikli.hudson.plugin.naginator.NaginatorOptOutProperty plugin="naginator@1.19.2">
+      <optOut>false</optOut>
+    </com.chikli.hudson.plugin.naginator.NaginatorOptOutProperty>
+  </properties>
+  <scm class="org.jenkinsci.plugins.p4.PerforceScm" plugin="p4@1.15.1">
+    <workspace class="org.jenkinsci.plugins.p4.workspace.ManualWorkspaceImpl">
+      <charset>none</charset>
+      <pinHost>false</pinHost>
+      <cleanup>false</cleanup>
+      <name>Jenkins</name>
+      <spec>
+        <allwrite>false</allwrite>
+        <clobber>true</clobber>
+        <compress>false</compress>
+        <locked>false</locked>
+        <modtime>false</modtime>
+        <rmdir>true</rmdir>
+        <streamName></streamName>
+        <streamAtChange></streamAtChange>
+        <line>LOCAL</line>
+        <view>//Depot/Game/... //Jenkins/Depot/Game/...
+-//Depot/Game/Game_Development/... //Jenkins/Depot/Game/Game_Development/...</view>
+        <changeView></changeView>
+        <type>WRITABLE</type>
+        <serverID></serverID>
+        <backup>true</backup>
+      </spec>
+    </workspace>
+    <populate class="org.jenkinsci.plugins.p4.populate.SyncOnlyImpl">
+      <have>true</have>
+      <force>false</force>
+      <modtime>false</modtime>
+      <quiet>true</quiet>
+      <pin></pin>
+      <parallel>
+        <enable>false</enable>
+        <threads>4</threads>
+        <minfiles>1</minfiles>
+        <minbytes>1024</minbytes>
+      </parallel>
+      <revert>false</revert>
+    </populate>
+  </scm>
+  <canRoam>true</canRoam>
+  <disabled>false</disabled>
+  <blockBuildWhenDownstreamBuilding>false</blockBuildWhenDownstreamBuilding>
+  <blockBuildWhenUpstreamBuilding>false</blockBuildWhenUpstreamBuilding>
+  <triggers>
+    <hudson.triggers.TimerTrigger>
+      <spec>TZ=America/Los_Angeles
+55 17 * * 0</spec>
+    </hudson.triggers.TimerTrigger>
+  </triggers>
+  <concurrentBuild>false</concurrentBuild>
+  <builders>
+    <hudson.tasks.Shell>
+      <command>$JENKINS_HOME/Unity/Hub/Editor/2022.3.8f1/Editor/Unity -batchmode -nographics -projectpath $WORKSPACE/Depot/Game/Game_Stable -buildWindows64Player &quot;${WORKSPACE}/Depot/Game/Builds/Windows/Game.exe&quot; -logFile $WORKSPACE/log.txt -quit
+$JENKINS_HOME/Unity/Hub/Editor/2022.3.8f1/Editor/Unity -batchmode -nographics -projectpath $WORKSPACE/Depot/Game/Game_Stable -buildOSXUniversalPlayer &quot;${WORKSPACE}/Depot/Game/Builds/Mac.app&quot; -logFile $WORKSPACE/log.txt -quit
+cd &quot;$WORKSPACE/Depot/Game/Builds/&quot;
+rm -rf &quot;Windows/Game_BurstDebugInformation_DoNotShip/&quot;
+chmod +w &quot;Windows.zip&quot; &quot;Mac.zip&quot;
+zip -FSr &quot;Windows.zip&quot; &quot;Windows/&quot;
+zip -FSr &quot;Mac.zip&quot; &quot;Mac.app/&quot;
+rm -rf &quot;Windows/&quot; &quot;Mac.app&quot; &quot;Mac_BurstDebugInformation_DoNotShip&quot;</command>
+      <configuredLocalRules/>
+    </hudson.tasks.Shell>
+  </builders>
+  <publishers>
+    <org.jenkinsci.plugins.p4.publish.PublishNotifier plugin="p4@1.15.1">
+      <workspace class="org.jenkinsci.plugins.p4.workspace.ManualWorkspaceImpl">
+        <charset>none</charset>
+        <pinHost>false</pinHost>
+        <cleanup>false</cleanup>
+        <name>Jenkins</name>
+        <spec>
+          <allwrite>false</allwrite>
+          <clobber>true</clobber>
+          <compress>false</compress>
+          <locked>false</locked>
+          <modtime>false</modtime>
+          <rmdir>true</rmdir>
+          <streamName></streamName>
+          <streamAtChange></streamAtChange>
+          <line>LOCAL</line>
+          <view>//Depot/Game/... //Jenkins/Depot/Game/...
+-//Depot/Game/Game_Development/... //Jenkins/Depot/Game/Game_Development/...</view>
+          <changeView></changeView>
+          <type>WRITABLE</type>
+          <serverID></serverID>
+          <backup>true</backup>
+        </spec>
+      </workspace>
+      <publish class="org.jenkinsci.plugins.p4.publish.SubmitImpl">
+        <description>Submitted by Jenkins. Build: ${P4_CHANGELIST}</description>
+        <onlyOnSuccess>true</onlyOnSuccess>
+        <delete>true</delete>
+        <modtime>false</modtime>
+        <paths>//Jenkins/Depot/Game/Builds/...</paths>
+        <reopen>false</reopen>
+        <purge></purge>
+      </publish>
+    </org.jenkinsci.plugins.p4.publish.PublishNotifier>
+  </publishers>
+  <buildWrappers>
+    <hudson.plugins.timestamper.TimestamperBuildWrapper plugin="timestamper@1.26"/>
+  </buildWrappers>
+</project>
